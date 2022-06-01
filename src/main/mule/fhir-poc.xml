@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a1fddfb3-55bf-4644-abd7-1aece79d79bc" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="37f0cca8-30a5-4ac6-b034-1717c261bdda" >
+		<salesforce:basic-connection username="bhargavi.a.b-53zn@force.com" password="Sushma!22" securityToken="t0hgD5sD7EzwZpg1F4N4LOxC" />
+	</salesforce:sfdc-config>
+	<flow name="fhir-pocFlow" doc:id="eda80374-a73c-49a1-b594-8844ea195f63" >
+		<salesforce:query doc:id="b193dcd4-5a57-454f-9020-580758370044" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Name FROM Account WHERE pid__c = ':id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	id : attributes.uriParams.id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="af6e1966-6088-4d30-a89f-2d99b20813a9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"name": payload[0].Name,
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="fhir-pocFlow1" doc:id="d1ab7091-4147-47ef-a5ab-8bccf17edde5" >
+		<ee:transform doc:name="Transform Message" doc:id="9f093f29-ac18-4605-99b8-7bc6c2604ea5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+pid__c: payload.id,
+Name: payload.name.use,
+Phone: payload.telecom.value
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:name="Create" doc:id="6bdd1495-f04e-4c78-8323-5405ef09bd09" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="b0243311-ed5e-4cc6-8aa3-1ff24394976c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

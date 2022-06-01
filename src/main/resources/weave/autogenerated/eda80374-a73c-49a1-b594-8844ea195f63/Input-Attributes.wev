@@ -1,0 +1,26 @@
+%dw 2.0
+
+type auto_eda80374_a73c_49a1_b594_8844ea195f63_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {| Accept?: "application/fhir+json" | "*/*" | "application/fhir+xml" |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    "_count"?: String, 
+    "_since"?: String
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {| id: String |}, 
+  version: String, 
+  localAddress: String
+|}
+
